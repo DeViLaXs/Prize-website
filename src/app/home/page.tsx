@@ -1,7 +1,7 @@
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import QuickInfo from "./components/QuickInfo";
-import CompetitionsSection from "./components/CompetitionsSection";
+import Navbar from "./_components/Navbar";
+import Hero from "./_components/Hero";
+import QuickInfo from "./_components/QuickInfo";
+import CompetitionsSection from "./_components/CompetitionsSection";
 
 export default function HomePage() {
   return (

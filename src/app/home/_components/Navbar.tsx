@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Trophy, UserPlus, User, Menu, X } from "lucide-react";
+import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
@@ -9,10 +10,10 @@ export default function Navbar() {
   const [activeTab, setActiveTab] = useState("home");
 
   const navLinks = [
-    { id: "home", label: "الرئيسية", href: "#" },
+    { id: "home", label: "الرئيسية", href: "/" },
     { id: "competitions", label: "المسابقات", href: "#" },
     { id: "leaderboard", label: "المتصدرين", href: "#" },
-    { id: "prizes", label: "الجوائز", href: "#" },
+    { id: "prizes", label: "الجوائز", href: "/prizes-dashboard" },
     { id: "how-to", label: "كيف تشارك؟", href: "#" },
     { id: "contact", label: "اتصل بنا", href: "#" },
   ];
@@ -40,8 +41,10 @@ export default function Navbar() {
                 key={link.id}
                 href={link.href}
                 onClick={(e) => {
-                  e.preventDefault();
-                  setActiveTab(link.id);
+                  if (link.href.startsWith("#")) {
+                    e.preventDefault();
+                    setActiveTab(link.id);
+                  }
                 }}
                 className={`relative px-1 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer ${
                   activeTab === link.id
@@ -61,15 +64,15 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             <ThemeToggle />
             
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#201047] dark:bg-[#201047] hover:bg-[#2d1861] text-white hover:text-white transition-all duration-200 cursor-pointer shadow-sm text-sm font-semibold border border-purple-950/20">
+            <Link href="/login" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#201047] dark:bg-[#201047] hover:bg-[#2d1861] text-white hover:text-white transition-all duration-200 cursor-pointer shadow-sm text-sm font-semibold border border-purple-950/20">
               <User className="h-4 w-4 text-purple-300" />
               <span>تسجيل دخول</span>
-            </button>
+            </Link>
 
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-md shadow-primary/20 cursor-pointer">
+            <Link href="/register" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-md shadow-primary/20 cursor-pointer">
               <UserPlus className="h-4 w-4" />
               <span>إنشاء حساب</span>
-            </button>
+            </Link>
           </div>
 
           {/* Mobile responsive: Menu & Toggle button */}
@@ -96,9 +99,11 @@ export default function Navbar() {
                 key={link.id}
                 href={link.href}
                 onClick={(e) => {
-                  e.preventDefault();
-                  setActiveTab(link.id);
-                  setIsOpen(false);
+                  if (link.href.startsWith("#")) {
+                    e.preventDefault();
+                    setActiveTab(link.id);
+                    setIsOpen(false);
+                  }
                 }}
                 className={`px-4 py-3 rounded-xl text-base font-semibold transition-colors duration-200 ${
                   activeTab === link.id
@@ -111,14 +116,14 @@ export default function Navbar() {
             ))}
           </div>
           <div className="border-t border-border/15 pt-4 flex flex-col gap-3">
-            <button className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#201047] text-white hover:bg-[#2d1861] transition-all cursor-pointer border border-purple-950/20 text-base font-semibold">
+            <Link href="/login" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#201047] text-white hover:bg-[#2d1861] transition-all cursor-pointer border border-purple-950/20 text-base font-semibold">
               <User className="h-5 w-5 text-purple-300" />
               تسجيل دخول
-            </button>
-            <button className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-base hover:bg-primary/90 transition-all shadow-md shadow-primary/25 cursor-pointer">
+            </Link>
+            <Link href="/register" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-base hover:bg-primary/90 transition-all shadow-md shadow-primary/25 cursor-pointer">
               <UserPlus className="h-5 w-5" />
               إنشاء حساب
-            </button>
+            </Link>
           </div>
         </div>
       )}
