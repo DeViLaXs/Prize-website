@@ -13,7 +13,6 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { useForm } from "@tanstack/react-form";
-import axios from "axios";
 import Link from "next/link";
 import {
   Trophy,
@@ -43,13 +42,86 @@ interface Prize {
   status: "pending" | "completed" | "cancelled";
 }
 
+const INITIAL_PRIZES: Prize[] = [
+  {
+    id: "1",
+    winnerName: "أحمد محمد",
+    prizeValue: "1000 $",
+    gameName: "عجلة الحظ",
+    date: "2026-05-28",
+    status: "completed",
+  },
+  {
+    id: "2",
+    winnerName: "سارة عبد الله",
+    prizeValue: "500 $",
+    gameName: "تحدي الأسئلة",
+    date: "2026-05-29",
+    status: "pending",
+  },
+  {
+    id: "3",
+    winnerName: "خالد العتيبي",
+    prizeValue: "2500 $",
+    gameName: "مسابقة التخمين",
+    date: "2026-05-30",
+    status: "completed",
+  },
+  {
+    id: "4",
+    winnerName: "مريم علي",
+    prizeValue: "150 $",
+    gameName: "عجلة الحظ",
+    date: "2026-05-30",
+    status: "cancelled",
+  },
+  {
+    id: "5",
+    winnerName: "يوسف حسن",
+    prizeValue: "2000 $",
+    gameName: "البطولة الكبرى",
+    date: "2026-05-30",
+    status: "pending",
+  },
+];
+
+// Simulated client-side API helper functions using localStorage
+const getLocalPrizes = async (): Promise<Prize[]> => {
+  await new Promise((resolve) => setTimeout(resolve, 800)); // simulate network delay
+  if (typeof window !== "undefined") {
+    const data = localStorage.getItem("prizes_db");
+    if (data) {
+      return JSON.parse(data);
+    }
+    localStorage.setItem("prizes_db", JSON.stringify(INITIAL_PRIZES));
+  }
+  return INITIAL_PRIZES;
+};
+
+const saveLocalPrize = async (
+  newPrize: Omit<Prize, "id" | "date">
+): Promise<Prize> => {
+  await new Promise((resolve) => setTimeout(resolve, 600)); // simulate network delay
+  const prizes = await getLocalPrizes();
+  const created: Prize = {
+    ...newPrize,
+    id: Math.random().toString(36).substring(2, 9),
+    date: new Date().toISOString().split("T")[0],
+  };
+  const updated = [created, ...prizes];
+  if (typeof window !== "undefined") {
+    localStorage.setItem("prizes_db", JSON.stringify(updated));
+  }
+  return created;
+};
+
 export default function PrizesDashboard() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  // TanStack Query: Fetch Prizes
+  // TanStack Query: Fetch Prizes from client storage
   const {
     data: prizes = [],
     isLoading,
@@ -57,23 +129,12 @@ export default function PrizesDashboard() {
     refetch,
   } = useQuery<Prize[]>({
     queryKey: ["prizes"],
-    queryFn: async () => {
-      const res = await axios.get("/api/prizes");
-      return res.data;
-    },
+    queryFn: getLocalPrizes,
   });
 
-  // TanStack Query: Create Prize Mutation
+  // TanStack Query: Create Prize Mutation in client storage
   const addPrizeMutation = useMutation({
-    mutationFn: async (newPrize: {
-      winnerName: string;
-      prizeValue: string;
-      gameName: string;
-      status: "pending" | "completed" | "cancelled";
-    }) => {
-      const res = await axios.post("/api/prizes", newPrize);
-      return res.data;
-    },
+    mutationFn: saveLocalPrize,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prizes"] });
     },
@@ -262,7 +323,7 @@ export default function PrizesDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 rounded-2xl bg-card border border-border/40 shadow-sm flex items-center justify-between">
             <div className="space-y-1.5">
-              <p className="text-muted-foreground text-xs sm:text-sm font-medium">مجموع الجوائز الموزعة</p>
+              <p className="text-muted-foreground text-xs sm:text-sm font-medium font-sans">مجموع الجوائز الموزعة</p>
               <h3 className="text-xl sm:text-2xl font-black text-foreground">
                 {isLoading ? "..." : `${totalPrizeAmount} $`}
               </h3>
@@ -330,7 +391,7 @@ export default function PrizesDashboard() {
               <Loader2 className={`h-4.5 w-4.5 ${isLoading ? "animate-spin text-primary" : ""}`} />
             </button>
             <span className="text-xs text-muted-foreground font-medium hidden sm:inline">
-              تم تحديث البيانات للتو
+              البيانات محفوظة محلياً
             </span>
           </div>
         </div>
